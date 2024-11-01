@@ -1,0 +1,112 @@
+-- Crear la base de datos
+CREATE DATABASE EcoSferaDB;
+GO
+
+USE EcoSferaDB;
+GO
+
+-- Crear la tabla tipo_documento
+CREATE TABLE tipo_documento (
+    id_tipo_documento INT PRIMARY KEY IDENTITY(1,1),
+    descripcion VARCHAR(50) NOT NULL
+);
+
+-- Crear la tabla usuario (independiente de cliente para evitar relación circular)
+CREATE TABLE usuario (
+    id_usuario INT PRIMARY KEY IDENTITY(1,1),
+    id_tipo_documento INT NOT NULL,
+    correo VARCHAR(255) NOT NULL,
+    nombre_completo VARCHAR(255) NOT NULL,
+    direccion VARCHAR(255),
+    FOREIGN KEY (id_tipo_documento) REFERENCES tipo_documento (id_tipo_documento)
+);
+
+-- Crear la tabla cliente (sin referencia a usuario)
+CREATE TABLE cliente (
+    id_cliente INT PRIMARY KEY IDENTITY(1,1),
+    id_tipo_documento INT NOT NULL,
+    correo VARCHAR(255) NOT NULL,
+    nombre_completo VARCHAR(255) NOT NULL,
+    id_direccion INT NOT NULL,
+    FOREIGN KEY (id_tipo_documento) REFERENCES tipo_documento (id_tipo_documento)
+);
+
+-- Crear la tabla factura
+CREATE TABLE factura (
+    id_factura INT PRIMARY KEY IDENTITY(1,1),
+    fecha DATE NOT NULL
+);
+
+-- Crear la tabla producto
+CREATE TABLE producto (
+    id_producto INT PRIMARY KEY IDENTITY(1,1),
+    nombre_producto VARCHAR(255) NOT NULL,
+    descripcion VARCHAR(500),
+    precio DECIMAL(10, 2) NOT NULL
+);
+
+-- Crear la tabla categoria
+CREATE TABLE categoria (
+    id_categoria INT PRIMARY KEY IDENTITY(1,1),
+    nombre_categoria VARCHAR(200) NOT NULL
+);
+
+-- Crear la tabla envio
+CREATE TABLE envio (
+    id_envio INT PRIMARY KEY IDENTITY(1,1),
+    direccion_envio VARCHAR(255) NOT NULL,
+    fecha_envio DATE,
+    estado VARCHAR(50) NOT NULL
+);
+
+-- Crear la tabla proveedores
+CREATE TABLE proveedores (
+    id_proveedor INT PRIMARY KEY IDENTITY(1,1),
+    nombre_proveedor VARCHAR(255) NOT NULL,
+    contacto VARCHAR(100)
+);
+
+-- Crear la tabla transportadora
+CREATE TABLE transportadora (
+    id_transportadora INT PRIMARY KEY IDENTITY(1,1),
+    nombre_transportadora VARCHAR(255) NOT NULL,
+    contacto VARCHAR(100)
+);
+
+-- Crear la tabla compra
+CREATE TABLE compra (
+    id_compra INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
+    id_factura INT NOT NULL,
+    id_cliente INT NOT NULL,
+    id_producto INT NOT NULL,
+    id_categoria INT NOT NULL,
+    id_envio INT NOT NULL,
+    FOREIGN KEY (id_factura) REFERENCES factura (id_factura),
+    FOREIGN KEY (id_cliente) REFERENCES cliente (id_cliente),
+    FOREIGN KEY (id_producto) REFERENCES producto (id_producto),
+    FOREIGN KEY (id_categoria) REFERENCES categoria (id_categoria),
+    FOREIGN KEY (id_envio) REFERENCES envio (id_envio)
+);
+
+-- Crear la tabla EcoSfera, con claves foráneas que resumen las relaciones
+CREATE TABLE EcoSfera (
+    id_compra INT NOT NULL,
+    id_factura INT NOT NULL,
+    id_cliente INT NOT NULL,
+    id_usuario INT NOT NULL,
+    id_producto INT NOT NULL,
+    id_proveedor INT,
+    informacion VARCHAR(500),
+    id_categoria INT,
+    id_envio INT,
+    id_transportadora INT,
+    FOREIGN KEY (id_compra) REFERENCES compra (id_compra),
+    FOREIGN KEY (id_factura) REFERENCES factura (id_factura),
+    FOREIGN KEY (id_cliente) REFERENCES cliente (id_cliente),
+    FOREIGN KEY (id_usuario) REFERENCES usuario (id_usuario),
+    FOREIGN KEY (id_producto) REFERENCES producto (id_producto),
+    FOREIGN KEY (id_proveedor) REFERENCES proveedores (id_proveedor),
+    FOREIGN KEY (id_categoria) REFERENCES categoria (id_categoria),
+    FOREIGN KEY (id_envio) REFERENCES envio (id_envio),
+    FOREIGN KEY (id_transportadora) REFERENCES transportadora (id_transportadora)
+);
